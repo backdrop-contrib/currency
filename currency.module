@@ -183,14 +183,14 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
     $url = 'http://download.finance.yahoo.com/d/quotes.csv?e=.csv&f=' . currency_get_fields($currency_array) . '&s=' . $from . $to . '=X';
 
     // Validate the passed currency codes, to make sure they are valid.
-    if (FALSE == currency_get_desc($from)) {
+    if (FALSE == currency_get_description($from)) {
       $msg = t("currency: Invalid currency_from = %from", array('%from' => $from));
       currency_log($msg, WATCHDOG_ERROR);
       $result['message'] = $msg;
       $result['status'] = FALSE;
     }
 
-    if (FALSE == currency_get_desc($to)) {
+    if (FALSE == currency_get_description($to)) {
       $msg = t("currency: Invalid currency_to = %to", array('%to' => $to));
       currency_log($msg, WATCHDOG_ERROR);
       return FALSE;
@@ -279,7 +279,7 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
  * Here is an example on how to use it:
  *
  *   $ccode = 'CAD';
- *   $ret = currency_get_description($ccode);
+ *   $ret = currency_get_descriptionription($ccode);
  *   if ($ret == FALSE) {
  *     drupal_set_message(t('Could not get description'));
  *   }
@@ -294,7 +294,7 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
  *   Contains FALSE if the currency cannot be found, otherwise, it
  *   has the description.
  */
-function currency_get_desc($currency) {
+function currency_get_description($currency) {
   $list = currency_get_list();
   if (isset($list[$currency])) {
     return $list[$currency];
@@ -1653,14 +1653,14 @@ function currency_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('From'),
     '#default_value' => $from,
-    '#options' => currency_api_get_list(),
+    '#options' => currency_get_list(),
   );
   
   $form['currency_to'] = array(
     '#type' => 'select',
     '#title' => t('To'),
     '#default_value' => $to,
-    '#options' => currency_api_get_list(),
+    '#options' => currency_get_list(),
   );
 
   $form['submit'] = array(
@@ -1715,7 +1715,7 @@ function theme_currency_result($variables) {
 
   $url = 'http://finance.yahoo.com/q?s=' . $currency_from . $currency_to . '=X';
 
-  $ret = currency_api_convert($currency_from, $currency_to, $amount);
+  $ret = currency_convert($currency_from, $currency_to, $amount);
   if ($ret['status'] == FALSE) { 
     $output .= t('Currency exchange error: @message', array('@message' => $ret['message']));
   }
@@ -1723,9 +1723,9 @@ function theme_currency_result($variables) {
     $output .= '<p class="result">';
     $output .=  t('@amount @from = @value @to', array(
       '@amount' => $amount,
-      '@from' => currency_api_get_desc($currency_from),
+      '@from' => currency_get_description($currency_from),
       '@value' => $ret['value'],
-      '@to' => currency_api_get_desc($currency_to)));
+      '@to' => currency_get_description($currency_to)));
     $output .= '</p>';
     $output .= '<p class="detailed-history">' . l(t('Detailed history and chart'), $url) . '</p>';
   }
