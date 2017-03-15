@@ -32,13 +32,13 @@ function currency_menu() {
   $items['currency'] = array(
     'title' => 'Currency exchange',
     'access arguments' => array('use currency'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('currency_form'),
   );
   $items['admin/config/regional/currency'] = array(
     'title' => 'Currency settings',
     'description' => 'Settings for currency.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('currency_admin_settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
@@ -85,7 +85,7 @@ function currency_admin_settings() {
     '#default_value' => $config->get('watchdog'),    
   );
 
-  $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
+  $period = backdrop_map_assoc(array(900, 1800, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
   $form['fetch'] = array(
     '#type' => 'select',
     '#title' => t('Currency data update frequency'),
@@ -112,7 +112,7 @@ function currency_admin_settings() {
  *   $amt  = 20;
  *   $ret  = currency_convert($from, $to, $amt);
  *   if ($ret['status'] == FALSE) {
- *     drupal_set_message(t('An error occured: '). $ret['message']);
+ *     backdrop_set_message(t('An error occured: '). $ret['message']);
  *   }
  *   else {
  *     print $amt . ' ' . $from . ' = ' . $ret['value'] . ' ' . $to;
@@ -158,8 +158,8 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
   $result['date'] = NULL;
   $result['time'] = NULL;
 
-  $from = drupal_strtoupper($currency_from);
-  $to   = drupal_strtoupper($currency_to);
+  $from = backdrop_strtoupper($currency_from);
+  $to   = backdrop_strtoupper($currency_to);
 
   if ($from == $to) {
     return array(
@@ -205,15 +205,15 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
       $result['status'] = FALSE;
     }
 
-    $http_result = drupal_http_request($url);
+    $http_result = backdrop_http_request($url);
     if (isset($http_result->error)) {
-      $msg = t('currency: drupal_http_request error: @error', array('@error' => $http_result->error));
+      $msg = t('currency: backdrop_http_request error: @error', array('@error' => $http_result->error));
       currency_log($msg, WATCHDOG_ERROR);
       return FALSE;
     }
 
     if ($http_result->code != 200) {
-      $msg = t('currency: drupal_http_request code: @code', array('@code' => $http_result->code));
+      $msg = t('currency: backdrop_http_request code: @code', array('@code' => $http_result->code));
       currency_log($msg, WATCHDOG_ERROR);
       return FALSE;
     }
@@ -281,7 +281,7 @@ function currency_convert($currency_from, $currency_to, $amount = 1, $decimals =
  *   $ccode = 'CAD';
  *   $ret = currency_get_descriptionription($ccode);
  *   if ($ret == FALSE) {
- *     drupal_set_message(t('Could not get description'));
+ *     backdrop_set_message(t('Could not get description'));
  *   }
  *   else {
  *     print $ccode .' => '. $ret;
@@ -1742,7 +1742,7 @@ function theme_currency_result($variables) {
 function currency_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'currency') . '/views',
+    'path' => backdrop_get_path('module', 'currency') . '/views',
   );
 }
 
