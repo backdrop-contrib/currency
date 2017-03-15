@@ -1,0 +1,9 @@
+{
+    "_config_name": "currency.settings",
+    "default_from": "CAD",
+    "default_to": "USD",
+    "description": "You can use this form to do currency exchange.",
+    "watchdog": 1,
+    "fetch": 3600
+    
+}

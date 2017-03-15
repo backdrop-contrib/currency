@@ -36,24 +36,12 @@ function currency_menu() {
     'page arguments' => array('currency_form'),
   );
   $items['admin/config/regional/currency'] = array(
-    'title' => 'Currency',
-    'description' => 'Settings for currency exchange rates.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('currency_admin_rates_settings'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  $items['admin/config/regional/currency/rates-settings'] = array(
-    'title' => 'Currency',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/config/regional/currency/settings'] = array(
-    'title' => 'Currency API',
-    'description' => 'Settings for currency API.',
+    'title' => 'Currency settings',
+    'description' => 'Settings for currency.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('currency_admin_settings'),
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_NORMAL_ITEM,
   );
 
   return $items;
@@ -63,50 +51,45 @@ function currency_menu() {
 /**
  * Menu callback; module settings form.
  */
-function currency_admin_settings() {  
-  $form['currency_default_from'] = array(
+function currency_admin_settings() {
+  $config = config('currency.settings');
+  $form['#config'] = 'currency.settings';
+  $form['default_from'] = array(
     '#type' => 'textfield',
     '#title' => t('Default Currency From'),
-    '#default_value' => variable_get('currency_default_from', 'CAD'),
+    '#default_value' => $config->get('default_from'),
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t('Three letter symbol for default currency to convert from.'),
   );
 
-  $form['currency_default_to'] = array(
+  $form['default_to'] = array(
     '#type' => 'textfield',
     '#title' => t('Default Currency To'),
-    '#default_value' => variable_get('currency_default_to', 'USD'),
+    '#default_value' => $config->get('default_to'),
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t('Three letter symbol for default currency to convert to.'),
   );
 
-  $form['currency_description'] = array(
+  $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Currency form text'),
-    '#default_value' => variable_get('currency_description', t('You can use this form to do currency exchange.')),
+    '#default_value' => $config->get('description'),
     '#description' => t('Text to display on the top of the currency form.'),
   );
 
-  return system_settings_form($form);
-}  
-
-/**
- * Menu callback; Currency rates settings form.
- */
-function currency_admin_rates_settings() {    
-  $form['currency_watchdog'] = array(
+  $form['watchdog'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log all currency exchange requests to watchdog'),    
-    '#default_value' => variable_get('currency_watchdog', 1),    
+    '#default_value' => $config->get('watchdog'),    
   );
 
   $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
-  $form['currency_fetch'] = array(
+  $form['fetch'] = array(
     '#type' => 'select',
     '#title' => t('Currency data update frequency'),
-    '#default_value' => variable_get('currency_fetch', UPDATE_FREQUENCY),
+    '#default_value' => $config->get('fetch'),
     '#options' => $period,
     '#description' => t('How long to keep the currency data from Yahoo! Finance. Default is 1 hour (3600 seconds).'),
   );
@@ -380,7 +363,7 @@ function currency_get_fields($array) {
  * Helper function to log messages to watchdog.
  */
 function currency_log($msg = '', $severity = WATCHDOG_NOTICE, $type = 'currency') {
-  if ($severity == WATCHDOG_ERROR || variable_get('currency_watchdog', 1)) {
+  if ($severity == WATCHDOG_ERROR || config_get('currency.settings', 'watchdog')) {
     watchdog($type, $msg, array(), $severity);
   }
 }
@@ -401,7 +384,7 @@ function currency_load(&$record, $currency_from, $currency_to) {
     $record = $rate[$currency_from][$currency_to];
   }
   else {
-    $result = db_query("SELECT * FROM {currencyapi} WHERE currency_from = :currency_from AND currency_to = :currency_to AND timestamp > :timestamp", array(':currency_from' => $currency_from, ':currency_to' => $currency_to, ':timestamp' => REQUEST_TIME - variable_get('currency_fetch', UPDATE_FREQUENCY)))->fetchObject();
+    $result = db_query("SELECT * FROM {currencyapi} WHERE currency_from = :currency_from AND currency_to = :currency_to AND timestamp > :timestamp", array(':currency_from' => $currency_from, ':currency_to' => $currency_to, ':timestamp' => REQUEST_TIME - config_get('currency.settings', 'fetch')))->fetchObject();
     if ($result) {
       $currency = array($currency_from . $currency_to . '=X', $result->rate, date('n/j/Y', $result->timestamp), date('g:ia', $result->timestamp));
       $record = implode(',', $currency);
@@ -1634,6 +1617,7 @@ function currency_permission() {
  * Currency exchange form.
  */
 function currency_form($form, &$form_state) {
+  $config = config('currency.settings');
   if (isset($form_state['storage']['currency_amount']) && isset($form_state['storage']['currency_from']) && $form_state['storage']['currency_to']) {
     // Get the saved data from the previous form submission.
     $amount = $form_state['storage']['currency_amount'];
@@ -1648,12 +1632,12 @@ function currency_form($form, &$form_state) {
   else {
     // Get the saved data from the session, if any.
     $amount = isset($_SESSION['currency_amount']) ? $_SESSION['currency_amount'] : 1;
-    $from = isset($_SESSION['currency_from']) ? $_SESSION['currency_from'] : variable_get('currency_default_from', 'CAD');
-    $to = isset($_SESSION['currency_to']) ? $_SESSION['currency_to'] : variable_get('currency_default_to', 'USD');
+    $from = isset($_SESSION['currency_from']) ? $_SESSION['currency_from'] : $config->get('default_from');
+    $to = isset($_SESSION['currency_to']) ? $_SESSION['currency_to'] : $config->get('default_to');
   }
 
   $form['currency_description'] = array(
-    '#markup' => variable_get('currency_description', t('You can use this form to do currency exchange.')),
+    '#markup' => $config->get('description'),
   );
 
   $form['currency_amount'] = array(
@@ -1760,4 +1744,15 @@ function currency_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'currency') . '/views',
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function curreny_config_info() {
+  $prefixes['currency.settings'] = array(
+    'label' => t('Currency settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
