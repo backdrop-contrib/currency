@@ -11,7 +11,7 @@ class currency_handler_field_currency extends views_handler_field {
       return parent::render($values);
     }
     else {                 
-      $currency_names = currency_api_get_list();
+      $currency_names = currency_get_list();
       $value = $currency_names[$values->{$this->field_alias}];
       return check_plain($value);
     }

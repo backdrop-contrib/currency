@@ -1756,3 +1756,14 @@ function curreny_config_info() {
   );
   return $prefixes;
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function currency_autoload_info() {
+  return array(
+    'currency_handler_filter_currency' => 'views/currency_handler_filter_currency.inc',
+    'currency_handler_field_currency' => 'views/currency_handler_field_currency.inc',
+    'currency_handler_argument_currency' => 'views/currency_handler_argument_currency.inc',
+  );
+}

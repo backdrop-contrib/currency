@@ -17,7 +17,7 @@ class currency_handler_argument_currency extends views_handler_argument {
    * This usually needs to be overridden to provide a proper title.
    */
   function title() {                     
-    $currency_names = currency_api_get_list();
+    $currency_names = currency_get_list();
     return $currency_names[$this->argument];
   }   
 }
