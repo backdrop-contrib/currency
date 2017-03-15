@@ -10,7 +10,7 @@
  *
  * Define schema for currencyapi database
  */
-function currency_api_schema() {
+function currency_schema() {
   $schema['currencyapi'] = array(
     'description' => 'Table to cache currency rates that have been looked up by the Currency API module.',
     'fields' => array(
@@ -46,13 +46,4 @@ function currency_api_schema() {
   );
 
   return $schema;
-}
-
-/**
- * Implements hook_uninstall().
- *
- * This will automatically remove the variables defined by Currency API.
- */
-function currency_api_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'currency_api%'");
 }

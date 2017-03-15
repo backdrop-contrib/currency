@@ -9,15 +9,15 @@
  * Implements hook_views_data().
  */
 function currency_views_data() {
-  $data['currencyapi']['table']['group'] = t('Currency');
+  $data['currency']['table']['group'] = t('Currency');
 
-  $data['currencyapi']['table']['base'] = array(
+  $data['currency']['table']['base'] = array(
     'field' => 'currency_from',
     'title' => t('Exchange Rates'),
     'help' => t('Exchange rates provided by the currency_api module'),
   );
 
-  $data['currencyapi']['currency_from'] = array(
+  $data['currency']['currency_from'] = array(
     'title' => t('Currency from'),
     'help' => t('The currency that the amount is converted from'),
     'field' => array(
@@ -31,7 +31,7 @@ function currency_views_data() {
     ),
   );
 
-  $data['currencyapi']['currency_to'] = array(
+  $data['currency']['currency_to'] = array(
     'title' => t('Currency to'),
     'help' => t('The currency that the amount is converted to'),
     'field' => array(
@@ -45,7 +45,7 @@ function currency_views_data() {
     ),
   );
 
-  $data['currencyapi']['rate'] = array(
+  $data['currency']['rate'] = array(
     'title' => t('Exchange rate'),
     'help' => t('The exchange rate used for conversion'),
     'field' => array(
@@ -53,7 +53,7 @@ function currency_views_data() {
     ),
   );
 
-  $data['currencyapi']['timestamp'] = array(
+  $data['currency']['timestamp'] = array(
     'title' => t('Timestamp'),
     'help' => t('The time that the exchange rate was last updated'),
     'field' => array(
